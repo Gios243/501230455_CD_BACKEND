@@ -16,7 +16,7 @@ router.get("/create", renderPageCreateCategory) //render ra form create
 router.post("/create", createCategory)
 
 router.get("/update/:id", renderPageUpdateCategory) //render ra form create
-router.post("/update", updateCategory)
+router.post("/update/:id", updateCategory)
 
 router.get("/delete/:id", renderPageDeleteCategory) //render ra form create
 router.post("/delete", deleteCategory)

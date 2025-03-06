@@ -1,4 +1,5 @@
 import CategoryModel from "../models/categoryModel.js"
+import mongoose from "mongoose"
 import { ObjectId } from "mongodb"
 import { removeVietnameseAccents } from "../common/index.js"
 const sortObjects =[
@@ -21,10 +22,9 @@ export async function listCategory(req, res) {
     if(search && search.length > 0){
         filters.searchString = {$regex:removeVietnameseAccents(search), $options:"i"}
     }
-
     try {
         const countCategories = await CategoryModel.countDocuments(filters)
-        const categories = await CategoryModel.find(filters).skip(skip).limit(pageSize)
+        const categories = await CategoryModel.find(filters).skip(skip).limit(pageSize).sort(sort)
         res.render("pages/categories/list", {
             title: "Categories",
             categories: categories,
@@ -45,19 +45,39 @@ export async function renderPageCreateCategory(req, res) {
         title: "Create Categories",
         mode: "Create",
         category: {},
+        err: {},
     })
 }
 
 export async function createCategory(req, res) {
     const data= req.body
     try {
+        const category = await CategoryModel.findOne({code : data.code, deleteAt:null})
+        if(category){
+            throw("code")
+        }
         await CategoryModel.create({
             ...data, createAt: new Date,
         })
         res.redirect("/categories")
     } catch (error) {
-        console.log(error)
-        res.send("Tạo loại sản phẩm không thành công!")
+        console.log("error", error)
+        let err = {}
+        if(error === "code"){
+            err.code = "Mã sản phẩm này đã tồn tại"
+        }
+        if(error.name === "ValidationError"){
+            Object.keys(error.errors).forEach(key => {
+                err[key] = error.errors[key].message
+            })
+        }
+        console.log("err",err)
+        res.render("pages/categories/form", {
+            title: "Create Categories",
+            mode: "Create",
+            category: {...data},
+            err
+        })
     }
 }
 
@@ -71,6 +91,7 @@ export async function renderPageUpdateCategory(req, res) {
                 title: "Create Categories",
                 mode: "Update",
                 category: category,
+                err: {},
             })
         } else {
             res.send("Hiện không có sản phẩm nào phù hợp!")
@@ -81,8 +102,14 @@ export async function renderPageUpdateCategory(req, res) {
     
 }
 export async function updateCategory(req, res) {
-    const { id , ...data } = req.body
+    const { ...data } = req.body
+    const { id, } = req.params
+
     try {
+        const category = await CategoryModel.findOne({ code: data.code, deleteAt: null })
+        if (category) {
+            throw ("code")
+        }
         await CategoryModel.updateOne(
             { _id: new ObjectId(id) },
             {
@@ -91,8 +118,23 @@ export async function updateCategory(req, res) {
             })
         res.redirect("/categories")
     } catch (error) {
-        console.log(error)
-        res.send("Cập nhật sản phẩm không thành công!")
+        console.log("error", error)
+        let err = {}
+        if (error === "code") {
+            err.code = "Mã sản phẩm này đã tồn tại"
+        }
+        if (error.name === "ValidationError") {
+            Object.keys(error.errors).forEach(key => {
+                err[key] = error.errors[key].message
+            })
+        }
+        console.log("err", err)
+        res.render("pages/categories/form" , {
+            title: "Update Categories",
+            mode: "Update",
+            category: { ...data, _id: id },
+            err
+        })
     }
 }
 
@@ -106,6 +148,8 @@ export async function renderPageDeleteCategory(req, res) {
                 title: "Create Categories",
                 mode: "Delete",
                 category: category,
+                err: {},
+
             })
         } else {
             res.send("Hiện không có sản phẩm nào phù hợp!")
