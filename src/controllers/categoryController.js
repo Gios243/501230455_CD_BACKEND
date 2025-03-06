@@ -1,8 +1,16 @@
 import CategoryModel from "../models/categoryModel.js"
 import { ObjectId } from "mongodb"
+import { removeVietnameseAccents } from "../common/index.js"
 export async function listCategory(req, res) {
+    const search = req.query?.search
+    let filters ={
+        deleteAt: null,
+    }
+    if(search && search.length > 0){
+        filters.searchString = {$regex:removeVietnameseAccents(search), $options:"i"}
+    }
     try {
-        const categories = await CategoryModel.find({deleteAt:null})
+        const categories = await CategoryModel.find(filters)
         res.render("pages/categories/list", {
             title: "Categories",
             categories: categories,
@@ -12,7 +20,7 @@ export async function listCategory(req, res) {
         res.send("Hien tai khong co san pham")
     }
 }
-
+//tao
 export async function renderPageCreateCategory(req, res) {
     res.render("pages/categories/form", {
         title: "Create Categories",
@@ -22,10 +30,10 @@ export async function renderPageCreateCategory(req, res) {
 }
 
 export async function createCategory(req, res) {
-    const { code, name, image } = req.body
+    const data= req.body
     try {
         await CategoryModel.create({
-            code, name, image, createAt: new Date,
+            ...data, createAt: new Date,
         })
         res.redirect("/categories")
     } catch (error) {
@@ -37,7 +45,7 @@ export async function createCategory(req, res) {
 //cap nhat
 export async function renderPageUpdateCategory(req, res) {
     try {
-        const { id } = req.params
+        const { id,} = req.params
         const category = await CategoryModel.findOne({ _id: new ObjectId(id), deleteAt: null })
         if (category) {
             res.render("pages/categories/form", {
@@ -54,14 +62,12 @@ export async function renderPageUpdateCategory(req, res) {
     
 }
 export async function updateCategory(req, res) {
-    const { code, name, image, id } = req.body
+    const { id , ...data } = req.body
     try {
         await CategoryModel.updateOne(
             { _id: new ObjectId(id) },
             {
-                code,
-                name,
-                image,
+                ...data,
                 updateAt: new Date(),
             })
         res.redirect("/categories")
