@@ -4,7 +4,9 @@ import {
     createCategory, 
     renderPageCreateCategory, 
     renderPageUpdateCategory,
-    updateCategory 
+    updateCategory,
+    renderPageDeleteCategory,
+    deleteCategory,
 } from "../controllers/categoryController.js";
 const router = express.Router();
 
@@ -15,5 +17,8 @@ router.post("/create", createCategory)
 
 router.get("/update/:id", renderPageUpdateCategory) //render ra form create
 router.post("/update", updateCategory)
+
+router.get("/delete/:id", renderPageDeleteCategory) //render ra form create
+router.post("/delete", deleteCategory)
 
 export default router;
