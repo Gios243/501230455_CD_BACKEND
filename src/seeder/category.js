@@ -1,8 +1,8 @@
 import CategoryModel from "../models/categoryModel.js";
 const data = [
     {
-        code :"AN_001",
-        name: "Áo nữ",
+        code :"A_001",
+        name: "Áo ",
         image: "cat-1.jpg",
         searchString: "ao nu",
         createAt: new Date(),
@@ -15,8 +15,8 @@ const data = [
         createAt: new Date(),
     },
     {
-        code: "GN_001",
-        name: "Giày nam",
+        code: "G_001",
+        name: "Giày ",
         image: "cat-3.jpg",
         searchString: "giay nam",
         createAt: new Date(),
