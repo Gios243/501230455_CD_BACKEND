@@ -1,5 +1,4 @@
 import CategoryModel from "../models/categoryModel.js"
-import mongoose from "mongoose"
 import { ObjectId } from "mongodb"
 import { removeVietnameseAccents } from "../common/index.js"
 const sortObjects =[
@@ -14,13 +13,20 @@ export async function listCategory(req, res) {
     const pageSize = !!req.query.pageSize ? parseInt(req.query.pageSize) : 5
     const page = !!req.query.page ? parseInt(req.query.page) : 1
     const skip = (page - 1) * pageSize
-    const sort = !!req.query.sort ? req.query.sort : null
+    let sort = !!req.query.sort ? req.query.sort : null
 
     let filters ={
         deleteAt: null,
     }
-    if(search && search.length > 0){
+    if(search && search.length > 0) {
         filters.searchString = {$regex:removeVietnameseAccents(search), $options:"i"}
+    }
+    if(!sort){
+        sort = { createAt: -1}
+    }else{
+        const sortArray = sort.split('_')
+        sort = {[sortArray[0]]: sortArray[1] === "ASC"? -1 : 1}
+        console.log("sort", sort)
     }
     try {
         const countCategories = await CategoryModel.countDocuments(filters)
@@ -32,7 +38,7 @@ export async function listCategory(req, res) {
             page: page,
             pageSize: pageSize,
             sortObjects,
-            sort: sort,
+            sort,
         })
     } catch (error) {
         console.log(error)
@@ -97,7 +103,8 @@ export async function renderPageUpdateCategory(req, res) {
             res.send("Hiện không có sản phẩm nào phù hợp!")
         }
     } catch (error) {
-        res.send("Trang web này không tồn tại")
+        console.log("error", error)
+        console.log("Update không thành công")
     }
     
 }
@@ -129,10 +136,10 @@ export async function updateCategory(req, res) {
             })
         }
         console.log("err", err)
-        res.render("pages/categories/form" , {
+        res.render("pages/categories/form", {
             title: "Update Categories",
             mode: "Update",
-            category: { ...data, _id: id },
+            category: { ...data, _id:id },
             err
         })
     }

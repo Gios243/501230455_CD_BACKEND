@@ -24,13 +24,13 @@
                 <% if (mode==="Delete" ) { %>
                     <form action="/categories/delete" method="post">
                 <% } %>
-                    <!-- <div class="form-group hide">
+                    <div class="form-group hide">
                         <input 
                         name="id" 
                         type="text" 
                         value="<%=category?._id%>" 
                         id="id">
-                    </div> -->
+                    </div>
 
                     <div class="form-group <%=err?.code&& 'has-error has-feedback'%>">
                         <label for="code">Mã loại sản phẩm</label>
