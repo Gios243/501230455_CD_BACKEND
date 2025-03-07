@@ -87,6 +87,18 @@ export async function createCategory(req, res) {
     }
 }
 
+export async function createCategoryByModal(req, res) {
+    const data = req.body
+    try {
+        const category = await CategoryModel.create({
+            ...data, createAt: new Date,
+        })
+        res.json({ success: true, category: category })
+    } catch (error) {
+        console.log(error)
+        res.json({success:false, category:{}})
+    }
+}
 //cap nhat
 export async function renderPageUpdateCategory(req, res) {
     try {
